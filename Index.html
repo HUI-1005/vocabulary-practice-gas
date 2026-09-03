@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>單字星球 Vocabulary Planet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --green:#17b887;--green-dark:#0f9f73;--green-soft:#eafaf5;
+      --blue:#367cf6;--blue-soft:#edf4ff;
+      --orange:#ff9d18;--orange-soft:#fff6df;
+      --pink:#f34f78;--pink-soft:#fff0f4;
+      --purple:#7545e8;--purple-soft:#f2ecff;
+      --ink:#10243f;--ink2:#344a65;--muted:#77879b;
+      --line:#e3eaf2;--bg:#f8fbff;--white:#fff;
+      --shadow:0 10px 30px rgba(50,75,105,.08);
+      --font:"Noto Sans TC",system-ui,-apple-system,"Segoe UI","Microsoft JhengHei",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:var(--font);color:var(--ink);background:var(--bg)}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+
+    .shell{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}
+    .sidebar{background:#fff;border-right:1px solid var(--line);padding:28px 18px;display:flex;flex-direction:column}
+    .planet-logo{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px}
+    .planet-icon{font-size:54px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 6px 8px rgba(29,184,135,.14))}
+    .brand{font-size:27px;font-weight:900;letter-spacing:.02em}
+    .brand-sub{font-size:12px;color:#7688a1;margin-top:4px}
+    .nav{display:flex;flex-direction:column;gap:9px}
+    .nav button{border:0;background:transparent;border-radius:18px;padding:14px 16px;text-align:left;font-weight:800;color:#536987;font-size:14px;transition:.15s}
+    .nav button:hover,.nav button.active{background:linear-gradient(90deg,#e8faf4,#f4fcfa);color:#10966f}
+    .nav-ico{display:inline-block;width:29px;font-size:19px;text-align:center;margin-right:4px}
+    .side-note{margin-top:auto;border-radius:20px;background:linear-gradient(155deg,#f4f9ff,#fff);border:1px solid #e7edf4;padding:20px 14px;text-align:center;color:#667990;font-size:12px;line-height:1.8}
+    .side-plant{font-size:42px;margin-bottom:8px}
+
+    .main{min-width:0;padding:30px 34px 24px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}
+    .greeting h1{font-size:34px;line-height:1.2;margin:0;font-weight:900}
+    .greeting p{margin:8px 0 0;color:#6f8198;font-size:15px}
+    .date-chip{background:#edf3fb;border-radius:999px;padding:11px 18px;color:#273d5a;font-weight:800;font-size:13px;white-space:nowrap}
+
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:27px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px;box-shadow:0 5px 18px rgba(50,75,105,.045);display:grid;grid-template-columns:62px 1fr;align-items:center;gap:13px;min-height:120px}
+    .stat-icon{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:31px}
+    .stat small{display:block;color:#445a76;font-size:13px;font-weight:800;margin-bottom:5px}
+    .stat strong{font-size:31px;line-height:1;font-weight:900}
+    .stat-meta{font-size:11px;color:#7c8999;margin-top:5px}
+    .stat.green .stat-icon{background:#dcf8ee}.stat.green strong{color:#0fae7b}
+    .stat.blue .stat-icon{background:#e6f0ff}.stat.blue strong{color:#2f77e8}
+    .stat.orange .stat-icon{background:#fff1d0}.stat.orange strong{color:#f49a17}
+    .stat.purple .stat-icon{background:#efe7ff}.stat.purple strong{color:#7444dc}
+
+    .workspace{min-height:560px}
+    .screen{min-height:560px}
+    .section-head{margin-bottom:14px}
+    .section-head h2{margin:0;font-size:23px;font-weight:900}
+    .section-head p{margin:6px 0 0;color:#72839a;font-size:13px}
+
+    #home{padding:0}
+    .mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .mode-card{border-radius:22px;background:#fff;border:1px solid var(--line);overflow:hidden;box-shadow:0 7px 22px rgba(50,75,105,.055);display:flex;flex-direction:column;min-height:315px}
+    .mode-visual{height:165px;display:grid;place-items:center;position:relative}
+    .mode-visual.green{background:linear-gradient(145deg,#e9fbf5,#f8fffc)}
+    .mode-visual.blue{background:linear-gradient(145deg,#eef5ff,#f9fbff)}
+    .mode-visual.orange{background:linear-gradient(145deg,#fff7e4,#fffdf7)}
+    .mode-visual.pink{background:linear-gradient(145deg,#fff0f4,#fff9fb)}
+    .mode-pill{position:absolute;left:16px;top:16px;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:900}
+    .green .mode-pill{background:#d9f7ec;color:#0f9d71}
+    .blue .mode-pill{background:#dfebff;color:#2f70d2}
+    .orange .mode-pill{background:#fff0c9;color:#e6890b}
+    .pink .mode-pill{background:#ffe0e9;color:#df3f68}
+    .mascot{font-size:74px;filter:drop-shadow(0 7px 6px rgba(30,80,120,.10))}
+    .mode-body{padding:16px 18px 18px;text-align:center;display:flex;flex-direction:column;flex:1}
+    .mode-body h3{font-size:23px;margin:0 0 4px;font-weight:900}
+    .mode-body p{font-size:13px;color:#6b7b90;margin:0 0 14px;line-height:1.6}
+    .mode-body button{margin-top:auto;border:0;border-radius:999px;color:#fff;padding:11px;font-weight:900;font-size:14px}
+    .btn-green{background:linear-gradient(135deg,#11af7a,#20c597)}
+    .btn-blue{background:linear-gradient(135deg,#2d73ef,#4487ff)}
+    .btn-orange{background:linear-gradient(135deg,#f49915,#ffae27)}
+    .btn-pink{background:linear-gradient(135deg,#ee4a70,#fa6687)}
+
+    .progress-section{margin-top:25px}
+    .progress-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 22px;box-shadow:0 5px 18px rgba(50,75,105,.045);display:grid;grid-template-columns:230px 1fr 220px;gap:24px;align-items:center}
+    .progress-left small{display:block;color:#52667f;font-weight:800;margin-bottom:2px}
+    .progress-left strong{font-size:27px}
+    .progress-left span{display:block;color:#718197;font-size:12px;margin-top:4px}
+    .progress-mid{text-align:center}.progress-mid-label{font-size:12px;color:#4d6079;margin-bottom:8px}
+    .home-progress{height:12px;border-radius:99px;background:#e9eef5;overflow:hidden}
+    .home-progress>div{height:100%;border-radius:99px;background:linear-gradient(90deg,#18b789,#26c89a);width:0}
+    .unlock-box{background:linear-gradient(145deg,#edf9f5,#f8fbfb);border-radius:16px;padding:13px;text-align:center}
+    .unlock-box small{display:block;color:#52667f}.unlock-box strong{display:block;color:#0ea674;font-size:28px}
+    .unlock-mini{height:6px;background:#dfece8;border-radius:99px;overflow:hidden;margin-top:7px}.unlock-mini>div{height:100%;background:#17b887;width:0}
+    .daily-note{margin-top:12px;border-radius:12px;background:#f0f4f8;color:#52677e;padding:8px 14px;font-size:12px}
+
+    .workspace-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);min-height:560px;overflow:hidden}
+    #loading{display:grid;place-items:center;color:#708198}
+    #preview,#quizScreen,.panel{padding:26px}
+    .head-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .preview-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:18px}
+    .word-card{border:1px solid var(--line);border-radius:15px;padding:20px 10px;text-align:center}.word-card .en{font-size:24px;font-weight:900}.word-card .zh{font-size:13px;color:#697b90;margin:6px 0 10px}
+    .mini-speak{border:1px solid var(--line);background:#f8fafc;border-radius:9px;padding:6px 9px;color:#53677c}
+    .phase{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 4px}.phase span{background:#f2f5f7;border-radius:999px;padding:6px 10px;font-size:11px;color:#8290a3;font-weight:800}.phase span.active{background:#eafaf5;color:#168865}
+    .actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+    .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800}.primary{background:linear-gradient(135deg,#17b887,#33c99d);color:#fff}.soft{background:#f4f7f9;color:#52677e;border:1px solid var(--line)}.danger{background:#fff0ee;color:#b5544f;border:1px solid #f1c5c1}
+    #quizScreen{display:grid;grid-template-rows:auto auto 1fr auto;gap:14px}.quiz-top{display:flex;justify-content:space-between;align-items:center;font-weight:800}.progress{height:7px;background:#e6ebef;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:linear-gradient(90deg,#17b887,#33c99d);width:0}.question-zone{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 0}.question{font-size:clamp(44px,5vw,68px);font-weight:900;line-height:1.05}.tip{background:#eef4fb;color:#4f6680;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800}.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:850px;margin:0 auto;width:100%}.option{position:relative;min-height:82px;border:1px solid #d8e1e9;border-radius:15px;background:#fff;padding:14px 20px 14px 62px;font-size:20px;font-weight:800;text-align:center}.option:before{content:attr(data-letter);position:absolute;left:17px;top:17px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f0f4f6;color:#5e7087;font-size:13px}.option.good{border-color:#22af80;background:#effbf6;color:#1a805e}.option.bad{border-color:#f1a8a2;background:#fff2f0;color:#ad5049}
+    .typing{display:flex;gap:9px;max-width:760px;width:100%;margin:0 auto}.typing input{flex:1;border:1px solid #d5e0e8;border-radius:11px;padding:13px 15px;font-size:18px;outline:0}.answer-row{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px;max-width:850px;width:100%;margin:0 auto}.feedback{min-height:52px;border-radius:11px;padding:12px 14px;display:flex;align-items:center;font-weight:700;visibility:hidden}.feedback.show{visibility:visible}.feedback.good{background:#eaf9f3;border:1px solid #c8ebdd;color:#15825f}.feedback.bad{background:#fff1ef;border:1px solid #f2cbc7;color:#ad4b44}.next{border:0;border-radius:11px;background:#edf2f4;color:#9da9b5;font-weight:800}.next:not(:disabled){background:linear-gradient(135deg,#17b887,#33c99d);color:#fff}
+    .panel h2{margin-top:0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid #edf1f4;text-align:left}th{background:#f8fafc}.word-link{color:#168865;font-weight:900;cursor:pointer}.empty{text-align:center;padding:40px;color:#77879b}.settings-box{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:12px}.settings-box h3{margin:0 0 8px;font-size:15px}.settings-box p{margin:0 0 12px;color:#77879b;font-size:12px;line-height:1.7}.drill-card{max-width:680px;margin:20px auto;border:1px solid var(--line);border-radius:16px;padding:22px}.drill-zh{text-align:center;font-size:34px;font-weight:900;margin:20px}.drill-count{text-align:center;color:#5f7289;font-size:13px;margin-bottom:12px}
+
+    @media(max-width:1100px){.mode-grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.progress-card{grid-template-columns:1fr}}
+    @media(max-width:820px){
+      .shell{display:block}.sidebar{position:sticky;top:0;z-index:20;padding:8px 10px;display:block}.planet-logo,.side-note{display:none}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}.nav button{padding:9px 3px;text-align:center;font-size:10px}.nav-ico{display:block;margin:0 auto 2px;width:auto}.main{padding:14px 10px}.topbar{margin-bottom:14px}.greeting h1{font-size:24px}.greeting p{font-size:12px}.date-chip{display:none}.stats{gap:8px}.stat{min-height:82px;padding:10px;grid-template-columns:42px 1fr}.stat-icon{width:42px;height:42px;font-size:20px}.stat strong{font-size:23px}.mode-grid{grid-template-columns:1fr}.mode-card{min-height:0}.mode-visual{height:135px}.mode-body h3{font-size:21px}.workspace-card{min-height:520px}.screen{min-height:520px}.preview-grid{grid-template-columns:repeat(2,1fr)}.options{grid-template-columns:1fr}.answer-row{grid-template-columns:1fr}.question{font-size:40px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="planet-logo">
+      <div class="planet-icon">🪐</div>
+      <div class="brand">單字星球</div>
+      <div class="brand-sub">Vocabulary Planet</div>
+    </div>
+    <nav class="nav">
+      <button class="active" data-nav="home" onclick="go('home')"><span class="nav-ico">🏠</span>首頁</button>
+      <button data-nav="words" onclick="go('words')"><span class="nav-ico">📖</span>單字庫</button>
+      <button data-nav="weak" onclick="go('weak')"><span class="nav-ico">🎯</span>錯字加強</button>
+      <button data-nav="settings" onclick="go('settings')"><span class="nav-ico">⚙️</span>設定</button>
+    </nav>
+    <div class="side-note">
+      <div class="side-plant">🌱</div>
+      每天進步一點點，<br>累積成大大的改變！
+      <div style="font-size:18px;margin-top:7px;color:#18b98a">♥</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="greeting">
+        <h1>嗨！今天也要加油 👋</h1>
+        <p>持續學習，讓單字成為你的超能力！ ✨</p>
+      </div>
+      <div class="date-chip">📅 <span id="homeDate"></span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat green">
+        <div class="stat-icon">📗</div>
+        <div><small>已學單字</small><strong id="learnedCount">0</strong><div class="stat-meta">持續累積中</div></div>
+      </div>
+      <div class="stat blue">
+        <div class="stat-icon">🎯</div>
+        <div><small>正確率</small><strong id="accuracyRate">0%</strong><div class="stat-meta">依全部答題計算</div></div>
+      </div>
+      <div class="stat orange">
+        <div class="stat-icon">🔥</div>
+        <div><small>連續學習</small><strong><span id="streakTop">0</span><span style="font-size:13px"> 天</span></strong><div class="stat-meta">保持學習節奏</div></div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-icon">⭐</div>
+        <div><small>總答題數</small><strong id="totalAnsweredCount">0</strong><div class="stat-meta">題</div></div>
+      </div>
+    </div>
+
+    <section class="workspace">
+      <div id="loading" class="screen workspace-card">讀取單字與進度中...</div>
+
+      <div id="home" class="screen hidden">
+        <div class="section-head">
+          <h2>🚀 開始練習</h2>
+          <p>選擇你現在最想練的模式吧！</p>
+        </div>
+
+        <div class="mode-grid">
+          <article class="mode-card">
+            <div class="mode-visual green"><span class="mode-pill">英 → 中</span><div class="mascot">🪐📘</div></div>
+            <div class="mode-body"><h3>英文 → 中文</h3><p>看英文，選出正確中文意思</p><button class="btn-green" onclick="quickPractice('en-zh')">開始練習</button></div>
+          </article>
+          <article class="mode-card">
+            <div class="mode-visual blue"><span class="mode-pill">中 → 英</span><div class="mascot">🌎🔤</div></div>
+            <div class="mode-body"><h3>中文 → 英文</h3><p>看中文，選出正確英文單字</p><button class="btn-blue" onclick="quickPractice('zh-en')">開始練習</button></div>
+          </article>
+          <article class="mode-card">
+            <div class="mode-visual orange"><span class="mode-pill">拼字</span><div class="mascot">🎧✍️</div></div>
+            <div class="mode-body"><h3>拼寫練習</h3><p>看中文，自己拼出英文單字</p><button class="btn-orange" onclick="quickPractice('spelling')">開始練習</button></div>
+          </article>
+          <article class="mode-card">
+            <div class="mode-visual pink"><span class="mode-pill">聽力</span><div class="mascot">🎧💗</div></div>
+            <div class="mode-body"><h3>聽力練習</h3><p>聽發音，再選出正確中文意思</p><button class="btn-pink" onclick="quickPractice('listening')">開始練習</button></div>
+          </article>
+        </div>
+
+        <div class="progress-section">
+          <div class="section-head"><h2>🚩 學習進度</h2></div>
+          <div class="progress-card">
+            <div class="progress-left"><small>目前進度</small><strong>第 <span id="batchNo">1</span> 組</strong><span>總共 <b id="batchTotalCount">1</b> 組（每組最多 20 個單字）</span></div>
+            <div class="progress-mid"><div class="progress-mid-label" id="homeProgressText">0 / 0 個單字</div><div class="home-progress"><div id="homeOverallProgress"></div></div></div>
+            <div class="unlock-box"><small>本組學習率</small><strong id="unlockPercent">0%</strong><div class="unlock-mini"><div id="unlockProgressBar"></div></div><button class="btn primary" style="margin-top:10px;width:100%" onclick="startLearning()">完整學習流程</button></div>
+          </div>
+          <div class="daily-note">💡 小提醒：每天花 10～15 分鐘，比一次背很多更有效喔！</div>
+          <div style="display:none"><span id="batchWordCount">0</span><span id="totalWordCount">0</span><span id="streakDays">0</span><span id="masteredCount">0</span><span id="weakCount">0</span><span id="todayCount">0</span></div>
+        </div>
+      </div>
+
+      <div id="preview" class="screen workspace-card hidden">
+        <div class="head-row"><div><small style="color:#168865;font-weight:900">先認識這一小組</small><h2 id="previewTitle">本組單字</h2></div><button class="btn soft" onclick="go('home')">返回</button></div>
+        <div class="phase" id="phaseBar"></div>
+        <div class="preview-grid" id="previewGrid"></div>
+        <div class="actions"><button class="btn primary" onclick="startMiniEnZh()">開始練習</button></div>
+      </div>
+
+      <div id="quizScreen" class="screen workspace-card hidden">
+        <div><div class="quiz-top"><span>第 <b id="quizBatch">1</b> 組</span><span id="quizProgress">0 / 0</span><button class="btn soft" style="padding:7px 11px" onclick="speakCurrent()">🔊</button></div><div class="progress"><div id="progressBar"></div></div></div>
+        <div class="question-zone"><div class="question" id="question"></div><div class="tip" id="tip"></div></div>
+        <div><div id="choices" class="options"></div><div id="typing" class="typing hidden"><input id="typingInput" placeholder="請輸入英文單字" autocomplete="off" autocapitalize="none" spellcheck="false"><button class="btn primary" onclick="submitTyping()">送出</button></div></div>
+        <div class="answer-row"><div id="feedback" class="feedback"></div><button id="nextBtn" class="next" disabled onclick="nextQuestion()">下一題</button></div>
+      </div>
+
+      <div id="wordsPanel" class="screen workspace-card panel hidden"><h2>📚 單字庫</h2><div id="wordsList"></div></div>
+      <div id="weakPanel" class="screen workspace-card panel hidden"><h2>🎯 錯字加強</h2><div id="weakContent"></div></div>
+      <div id="settingsPanel" class="screen workspace-card panel hidden">
+        <h2>⚙️ 設定</h2>
+        <div class="settings-box"><h3>下一組</h3><p>直接跳到下一個 20 字批次，不會刪除已學紀錄。</p><button class="btn soft" onclick="skipBatch()">先學下一組</button></div>
+        <div class="settings-box"><h3>重新開始</h3><p>會清除 Progress、Settings 與 History，但不會刪除 Vocabulary 單字。</p><button class="btn danger" onclick="resetData()">清除學習紀錄</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const BATCH_SIZE = 20;
+const MICRO_SIZE = 5;
+const DRILL_TARGET = 10;
+let ALL_WORDS = [];
+let state = { batch:1,totalAnswered:0,totalCorrect:0,words:{} };
+let dashboard = { todayAnswered:0,todayCorrect:0,learningStreak:0 };
+let microIndex = 0;
+let miniWords = [];
+let flowWrong = new Map();
+let queue = [];
+let qIndex = 0;
+let current = null;
+let answered = false;
+let phase = '';
+let drillWords = [];
+let drillIndex = 0;
+let drillRepeat = 0;
+
+window.addEventListener('DOMContentLoaded', loadApp);
+
+function loadApp(){
+  google.script.run.withSuccessHandler(initApp).withFailureHandler(showError).getInitialData();
+}
+function initApp(data){
+  ALL_WORDS = (data.words || []).map(w=>({en:String(w.en||'').trim(),zh:String(w.zh||'').trim()})).filter(w=>w.en&&w.zh);
+  state.batch = Number(data.settings?.batch || 1);
+  state.totalAnswered = Number(data.settings?.totalAnswered || 0);
+  state.totalCorrect = Number(data.settings?.totalCorrect || 0);
+  state.words = data.progress || {};
+  dashboard = Object.assign(dashboard,data.dashboardStats||{});
+  normalizeBatch();
+  document.getElementById('loading').classList.add('hidden');
+  go('home');
+  updateStats();
+}
+function showError(err){ document.getElementById('loading').innerHTML = '<div>讀取失敗：'+escapeHtml(err?.message||String(err))+'</div>'; }
+function setActiveNav(name){ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===name)); }
+function hideAll(){ ['home','preview','quizScreen','wordsPanel','weakPanel','settingsPanel'].forEach(id=>document.getElementById(id)?.classList.add('hidden')); }
+function go(name){
+  hideAll(); setActiveNav(name);
+  if(name==='home'){ renderHome(); document.getElementById('home').classList.remove('hidden'); }
+  if(name==='words'){ renderWords(); document.getElementById('wordsPanel').classList.remove('hidden'); }
+  if(name==='weak'){ renderWeak(); document.getElementById('weakPanel').classList.remove('hidden'); }
+  if(name==='settings'){ document.getElementById('settingsPanel').classList.remove('hidden'); }
+}
+function batchCount(){ return Math.max(1,Math.ceil(ALL_WORDS.length/BATCH_SIZE)); }
+function normalizeBatch(){ state.batch=Math.min(batchCount(),Math.max(1,Number(state.batch||1))); }
+function batchWords(batch=state.batch){ const start=(batch-1)*BATCH_SIZE; return ALL_WORDS.slice(start,start+BATCH_SIZE); }
+function ensureWord(en){ if(!state.words[en]) state.words[en]={seen:0,correct:0,wrong:0,spellingWrong:0,mastery:0,lastSeen:0,spellingPassed:false,lastSpellingDate:0,crossDaySpellingSuccess:0}; return state.words[en]; }
+function renderHome(){
+  normalizeBatch();
+  const batch = batchWords();
+  const learned = ALL_WORDS.filter(w=>ensureWord(w.en).seen>0).length;
+  const total = ALL_WORDS.length;
+  const accuracy = state.totalAnswered > 0 ? Math.round(state.totalCorrect / state.totalAnswered * 100) : 0;
+  const batches = Math.max(1, batchCount());
+  const groupProgress = total > 0 ? Math.min(100, Math.round(learned / total * 100)) : 0;
+  const currentBatchLearned = batch.filter(w=>ensureWord(w.en).seen>0).length;
+  const unlockPercent = batch.length ? Math.min(100, Math.round(currentBatchLearned / batch.length * 100)) : 0;
+
+  const setText=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  setText('batchNo',state.batch);
+  setText('batchWordCount',batch.length);
+  setText('totalWordCount',total);
+  setText('streakDays',Number(dashboard.learningStreak||0));
+  setText('accuracyRate',accuracy+'%');
+  setText('totalAnsweredCount',state.totalAnswered);
+  setText('batchTotalCount',batches);
+  setText('homeProgressText',`${learned} / ${total} 個單字`);
+  setText('unlockPercent',unlockPercent+'%');
+
+  const progress=document.getElementById('homeOverallProgress');
+  if(progress) progress.style.width=groupProgress+'%';
+  const unlock=document.getElementById('unlockProgressBar');
+  if(unlock) unlock.style.width=unlockPercent+'%';
+
+  const dateEl=document.getElementById('homeDate');
+  if(dateEl){
+    const d=new Date();
+    const week=['日','一','二','三','四','五','六'][d.getDay()];
+    dateEl.textContent=`${d.getFullYear()} / ${String(d.getMonth()+1).padStart(2,'0')} / ${String(d.getDate()).padStart(2,'0')}（${week}）`;
+  }
+}
+function startLearning(){ if(!batchWords().length){ alert('Vocabulary 還沒有單字，請先貼上 en / zh。'); return; } microIndex=0; flowWrong.clear(); showPreview(); }
+
+function quickPractice(mode){
+  const words=batchWords();
+  if(!words.length){ alert('Vocabulary 還沒有單字，請先貼上 en / zh。'); return; }
+  flowWrong.clear();
+  phase='quick-'+mode;
+  queue=shuffle(words.map(w=>({word:w,mode:mode})));
+  startQueue();
+}
+function showPreview(){ miniWords=batchWords().slice(microIndex*MICRO_SIZE,(microIndex+1)*MICRO_SIZE); if(!miniWords.length){ startComprehensive(); return; } hideAll(); document.getElementById('preview').classList.remove('hidden'); document.getElementById('previewTitle').textContent=`第 ${state.batch} 組｜第 ${microIndex+1} 小段`; document.getElementById('previewGrid').innerHTML=miniWords.map((w,i)=>`<div class="word-card"><div class="en">${escapeHtml(w.en)}</div><div class="zh">${escapeHtml(w.zh)}</div><button class="mini-speak" onclick="speak('${escapeJs(w.en)}')">🔊 發音</button></div>`).join(''); renderPhase(); }
+function renderPhase(){ const labels=['① 學＋拼','② 學＋拼','③ 學＋拼','④ 學＋拼','綜合複習']; document.getElementById('phaseBar').innerHTML=labels.map((x,i)=>`<span class="${i===microIndex?'active':''}">${x}</span>`).join(''); }
+function startMiniEnZh(){ phase='mini-en-zh'; queue=shuffle(miniWords.map(w=>({word:w,mode:'en-zh'}))); startQueue(); }
+function startMiniZhEn(){ phase='mini-zh-en'; queue=shuffle(miniWords.map(w=>({word:w,mode:'zh-en'}))); startQueue(); }
+function startMiniSpelling(){ phase='mini-spelling'; queue=shuffle(miniWords.map(w=>({word:w,mode:'spelling'}))); startQueue(); }
+function startComprehensive(){ phase='comprehensive'; queue=shuffle(batchWords().map((w,i)=>({word:w,mode:i%2?'zh-en':'en-zh'}))); startQueue(); }
+function startWeakReview(){ const words=[...flowWrong.values()]; if(!words.length){ completeFlow(); return; } phase='weak-spelling'; queue=shuffle(words.map(w=>({word:w,mode:'spelling'}))); startQueue(); }
+function startQueue(){ qIndex=0; answered=false; hideAll(); document.getElementById('quizScreen').classList.remove('hidden'); document.getElementById('quizBatch').textContent=state.batch; renderQuestion(); }
+function renderQuestion(){ if(qIndex>=queue.length){ finishPhase(); return; } current=queue[qIndex]; answered=false; const w=current.word; document.getElementById('quizProgress').textContent=`${qIndex+1} / ${queue.length}`; document.getElementById('progressBar').style.width=`${(qIndex/Math.max(1,queue.length))*100}%`; document.getElementById('feedback').className='feedback'; document.getElementById('feedback').innerHTML=''; document.getElementById('nextBtn').disabled=true; document.getElementById('choices').classList.add('hidden'); document.getElementById('typing').classList.add('hidden'); if(current.mode==='en-zh'){ document.getElementById('question').textContent=w.en; document.getElementById('tip').textContent='英文 → 中文｜選出正確意思'; renderChoices(w,'zh'); speak(w.en); } else if(current.mode==='zh-en'){ document.getElementById('question').textContent=w.zh; document.getElementById('tip').textContent='中文 → 英文｜選出正確單字'; renderChoices(w,'en'); } else if(current.mode==='listening'){
+  document.getElementById('question').textContent='🎧 聽單字';
+  document.getElementById('tip').textContent='聽力 → 中文｜選出正確意思';
+  renderChoices(w,'zh');
+  speak(w.en);
+} else {
+  document.getElementById('question').textContent=w.zh;
+  document.getElementById('tip').textContent='中文 → 英文｜拼出正確單字';
+  document.getElementById('typing').classList.remove('hidden');
+  const input=document.getElementById('typingInput');
+  input.value='';
+  setTimeout(()=>input.focus(),50);
+} }
+function renderChoices(word,field){ const pool=ALL_WORDS.filter(w=>w.en!==word.en); const distract=shuffle(pool).slice(0,3); const list=shuffle([word,...distract]); document.getElementById('choices').innerHTML=list.map((w,i)=>`<button class="option" data-letter="${'ABCD'[i]}" onclick="pickChoice(this,'${escapeJs(w.en)}')">${escapeHtml(w[field])}</button>`).join(''); document.getElementById('choices').classList.remove('hidden'); }
+function pickChoice(btn,en){ if(answered) return; const isCorrect=en===current.word.en; document.querySelectorAll('.option').forEach(b=>b.disabled=true); btn.classList.add(isCorrect?'good':'bad'); if(!isCorrect){ const correct=[...document.querySelectorAll('.option')].find(b=>b.getAttribute('onclick')?.includes("'"+escapeJs(current.word.en)+"'")); if(correct) correct.classList.add('good'); } recordAnswer(isCorrect,btn.textContent.trim()); }
+function submitTyping(){ if(answered) return; const input=document.getElementById('typingInput'); const typed=input.value.trim(); if(!typed) return; const ok=typed.toLowerCase()===current.word.en.toLowerCase(); recordAnswer(ok,typed); if(!ok){ speak(current.word.en); setTimeout(()=>{input.value='';input.focus();},2000); } }
+function recordAnswer(ok,inputValue){ answered=true; const w=current.word; const s=ensureWord(w.en); s.seen++; s.lastSeen=Date.now(); if(ok){ s.correct++; s.mastery=Math.min(5,s.mastery+1); if(current.mode==='spelling') s.spellingPassed=true; } else { if(current.mode==='spelling') s.spellingWrong++; else s.wrong++; s.mastery=Math.max(0,s.mastery-1); flowWrong.set(w.en,w); }
+  state.totalAnswered++; if(ok) state.totalCorrect++;
+  const fb=document.getElementById('feedback'); fb.className='feedback show '+(ok?'good':'bad'); fb.innerHTML=ok?`✅ 正確：<strong>${escapeHtml(w.en)}</strong> = ${escapeHtml(w.zh)}`:`❌ 正確答案：<strong>${escapeHtml(w.en)}</strong> = ${escapeHtml(w.zh)}`;
+  saveWord(w,s); saveCore(); google.script.run.withFailureHandler(console.error).saveHistory({en:w.en,zh:w.zh,mode:current.mode,result:ok?'correct':'wrong',input:inputValue,batch:state.batch}); dashboard.todayAnswered=Number(dashboard.todayAnswered||0)+1; if(ok) dashboard.todayCorrect=Number(dashboard.todayCorrect||0)+1; updateStats();
+  if(ok){ setTimeout(()=>{qIndex++;renderQuestion();},420); } else { document.getElementById('nextBtn').disabled=false; }
+}
+function nextQuestion(){ if(!answered) return; qIndex++; renderQuestion(); }
+function finishPhase(){
+  if(String(phase).startsWith('quick-')){
+    updateStats();
+    go('home');
+    alert('這輪練習完成！');
+    return;
+  }
+  if(phase==='mini-en-zh'){startMiniZhEn();return;}
+  if(phase==='mini-zh-en'){startMiniSpelling();return;}
+  if(phase==='mini-spelling'){microIndex++;showPreview();return;}
+  if(phase==='comprehensive'){startWeakReview();return;}
+  completeFlow();
+}
+function completeFlow(){ const done=state.batch; if(state.batch<batchCount()) state.batch++; saveCore(); updateStats(); go('home'); alert(`第 ${done} 組完成！${flowWrong.size?`\n這輪有 ${flowWrong.size} 個字會留在錯字加強。`:'\n這輪沒有留下弱字，很棒！'}`); }
+function saveWord(w,s){ google.script.run.withFailureHandler(console.error).saveProgress({en:w.en,seen:s.seen,correct:s.correct,wrong:s.wrong,spellingWrong:s.spellingWrong,mastery:s.mastery,lastSeen:s.lastSeen,spellingPassed:s.spellingPassed,lastSpellingDate:s.lastSpellingDate,crossDaySpellingSuccess:s.crossDaySpellingSuccess}); }
+function saveCore(){ google.script.run.withFailureHandler(console.error).saveSettings({batch:state.batch,totalAnswered:state.totalAnswered,totalCorrect:state.totalCorrect}); }
+function updateStats(){
+  const learned=ALL_WORDS.filter(w=>ensureWord(w.en).seen>0).length;
+  const mastered=ALL_WORDS.filter(w=>ensureWord(w.en).mastery>=3).length;
+  const weak=ALL_WORDS.filter(w=>{const s=ensureWord(w.en);return (s.wrong+s.spellingWrong)>0&&s.mastery<3}).length;
+  const setText=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  setText('learnedCount',learned);
+  setText('masteredCount',mastered);
+  setText('weakCount',weak);
+  setText('todayCount',Number(dashboard.todayAnswered||0));
+  setText('streakTop',Number(dashboard.learningStreak||0));
+  renderHome();
+}
+function renderWords(){ const rows=ALL_WORDS.map(w=>{const s=ensureWord(w.en); return `<tr><td class="word-link" onclick="speak('${escapeJs(w.en)}')">${escapeHtml(w.en)} 🔊</td><td>${escapeHtml(w.zh)}</td><td>${s.seen}</td><td>${s.mastery}/5</td></tr>`;}).join(''); document.getElementById('wordsList').innerHTML=ALL_WORDS.length?`<div class="table-wrap"><table><thead><tr><th>English</th><th>中文</th><th>看過</th><th>熟悉度</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">尚未加入單字。</div>'; }
+function getWeakWords(){ return ALL_WORDS.filter(w=>{const s=ensureWord(w.en);return (s.wrong+s.spellingWrong)>0&&s.mastery<3;}); }
+function renderWeak(){ const words=getWeakWords(); if(!words.length){ document.getElementById('weakContent').innerHTML='<div class="empty">目前沒有待加強單字 🎉</div>'; return; } drillWords=words; drillIndex=0; drillRepeat=0; renderDrill(); }
+function renderDrill(){ const box=document.getElementById('weakContent'); if(drillIndex>=drillWords.length){ box.innerHTML='<div class="empty">這輪錯字加強完成！</div>'; updateStats(); return; } const w=drillWords[drillIndex]; box.innerHTML=`<div class="drill-card"><div class="drill-count">${drillIndex+1} / ${drillWords.length}｜連續正確 ${drillRepeat} / ${DRILL_TARGET}</div><div class="drill-zh">${escapeHtml(w.zh)}</div><div style="text-align:center;margin-bottom:12px"><button class="btn soft" onclick="speak('${escapeJs(w.en)}')">🔊 聽發音</button></div><div class="typing"><input id="drillInput" placeholder="輸入英文單字" autocomplete="off" autocapitalize="none" spellcheck="false"><button class="btn primary" onclick="submitDrill()">送出</button></div><div id="drillFeedback" class="feedback" style="margin-top:10px"></div></div>`; setTimeout(()=>document.getElementById('drillInput')?.focus(),50); }
+function submitDrill(){ const w=drillWords[drillIndex]; const input=document.getElementById('drillInput'); const typed=input.value.trim(); if(!typed) return; const fb=document.getElementById('drillFeedback'); if(typed.toLowerCase()===w.en.toLowerCase()){ drillRepeat++; fb.className='feedback show good'; fb.innerHTML=`✅ 正確：<strong>${escapeHtml(w.en)}</strong>`; if(drillRepeat>=DRILL_TARGET){ const s=ensureWord(w.en); s.mastery=Math.min(5,s.mastery+1); saveWord(w,s); setTimeout(()=>{drillIndex++;drillRepeat=0;renderDrill();},500); } else setTimeout(()=>{input.value='';input.focus();},160); } else { fb.className='feedback show bad'; fb.innerHTML=`❌ 正確：<strong>${escapeHtml(w.en)}</strong>`; speak(w.en); setTimeout(()=>{input.value='';input.focus();},2000); } }
+function skipBatch(){ if(state.batch<batchCount()){state.batch++;saveCore();updateStats();go('home');}else alert('已經是最後一組。'); }
+function resetData(){ if(!confirm('確定清除所有學習紀錄嗎？Vocabulary 單字不會被刪除。')) return; google.script.run.withSuccessHandler(()=>location.reload()).withFailureHandler(showError).resetLearningData(); }
+function speakCurrent(){ if(current?.word?.en) speak(current.word.en); }
+function speak(text){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=.9; speechSynthesis.speak(u); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+function escapeJs(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.activeElement?.id==='typingInput'){ answered?nextQuestion():submitTyping(); } if(e.key==='Enter'&&document.activeElement?.id==='drillInput') submitDrill(); });
+</script>
+</body>
+</html>
